@@ -3,8 +3,6 @@
 [![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![MediaPipe](https://img.shields.io/badge/MediaPipe-Vision-00897B?style=for-the-badge&logo=google&logoColor=white)](https://developers.google.com/mediapipe)
 [![Web Audio API](https://img.shields.io/badge/Web%20Audio%20API-Procedural-blueviolet?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
-[![Cloudflare Pages](https://img.shields.io/badge/Cloudflare_Pages-Ready-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://pages.cloudflare.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg?style=for-the-badge)](LICENSE)
 
 > A virtual, webcam-controlled hookah lounge experience powered by computer vision hand tracking, face tracking, procedural physics, and real-time audio synthesis.  
 > **100% Virtual Entertainment & Smoke-Free**.
@@ -53,8 +51,8 @@
 ### Setup & Run
 ```bash
 # 1. Clone repository
-git clone https://github.com/<your-username>/hookah-gesture-lounge.git
-cd hookah-gesture-lounge
+git clone https://github.com/mubashir2002/virtual-hookah.git
+cd virtual-hookah
 
 # 2. Install dependencies
 npm install
@@ -67,35 +65,6 @@ Visit `http://localhost:3000` to run the lounge locally.
 
 ---
 
-## ⚡ Deployment to Cloudflare Pages
-
-This project is built and optimized for static hosting on **Cloudflare Pages**.
-
-### Option A: Via Cloudflare Dashboard (Recommended)
-1. Push your repository to **GitHub**.
-2. Log in to the [Cloudflare Dashboard](https://dash.cloudflare.com/) and navigate to **Workers & Pages**.
-3. Click **Create Application** > **Pages** > **Connect to Git**.
-4. Select your `hookah-gesture-lounge` repository.
-5. Configure build settings:
-   - **Framework preset**: `Vite`
-   - **Build command**: `npm run build`
-   - **Build output directory**: `dist`
-   - **Root directory**: `/`
-6. Click **Save and Deploy**.
-
-### Option B: Via Wrangler CLI
-```bash
-# 1. Build production bundle
-npm run build
-
-# 2. Deploy directly with Wrangler
-npx wrangler pages deploy dist --project-name=hookah-gesture-lounge
-```
-
-> **Note on WASM headers**: Pre-configured in `public/_headers` to ensure `.wasm` assets are served with the correct `application/wasm` MIME type and long-term caching.
-
----
-
 ## 📦 Project Structure
 
 ```
@@ -104,7 +73,7 @@ npx wrangler pages deploy dist --project-name=hookah-gesture-lounge
 ├── package.json        # Project metadata & dependencies
 ├── vite.config.js      # Vite build configuration
 ├── public/
-│   ├── _headers        # Cloudflare Pages MIME & cache configuration
+│   ├── _headers        # Static assets MIME & cache configuration
 │   ├── favicon.svg     # SVG luxury icon
 │   └── wasm/           # MediaPipe local vision WASM binaries
 └── src/
@@ -137,9 +106,3 @@ npx wrangler pages deploy dist --project-name=hookah-gesture-lounge
 - **Zero Server Uploads**: The camera feed never leaves your browser.
 - **Client-Side Only**: All inference happens on device via WebAssembly.
 - **Entertainment Purpose**: This application is a creative interactive simulation created strictly for artistic and entertainment purposes.
-
----
-
-## 📄 License
-
-MIT License. See [LICENSE](LICENSE) for details.
