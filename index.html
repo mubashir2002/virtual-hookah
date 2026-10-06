@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Hookah Gesture Lounge | Interactive Webcam Experience</title>
+    <meta
+      name="description"
+      content="A webcam-controlled virtual hookah lounge experience. Control the pipe with hand gestures and smoke virtual flavored clouds."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body class="theme-charcoal">
+    <div id="app">
+      <video id="webcam-video" playsinline muted autoplay></video>
+
+      <canvas id="experience-canvas"></canvas>
+
+      <div class="lounge-vignette" id="lounge-vignette"></div>
+      <div class="lounge-glow" id="lounge-glow"></div>
+
+      <section id="landing-screen" class="screen-overlay active">
+        <div class="glass-card landing-card">
+          <div class="brand-badge">
+            <span class="pulse-dot"></span>
+            <span>Virtual Entertainment Only • 100% Smoke-Free</span>
+          </div>
+
+          <h1 class="lounge-title">
+            <span class="lounge-title-main">Hookah Gesture</span>
+            <span class="lounge-title-sub">Lounge</span>
+          </h1>
+
+          <p class="landing-tagline">
+            Experience the lounge through your webcam. Control the pipe naturally with your <strong>hands</strong>.
+            Pinch to grab the mouthpiece, bring it to your mouth, and exhale virtual clouds.
+          </p>
+
+          <div class="landing-actions">
+            <button id="btn-enable-camera" class="btn btn-primary" type="button">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              <span>Enable Camera</span>
+            </button>
+          </div>
+
+          <div class="gesture-preview-row">
+            <div class="gesture-mini-card">
+              <div class="gesture-icon pinch-icon">👌</div>
+              <div class="gesture-desc">
+                <strong>Pinch Hand</strong>
+                <span>Grab & move mouthpiece</span>
+              </div>
+            </div>
+            <div class="gesture-mini-card">
+              <div class="gesture-icon mouth-icon">👄</div>
+              <div class="gesture-desc">
+                <strong>To Your Mouth</strong>
+                <span>Inhale virtual smoke</span>
+              </div>
+            </div>
+            <div class="gesture-mini-card">
+              <div class="gesture-icon cloud-icon">💨</div>
+              <div class="gesture-desc">
+                <strong>Move Away</strong>
+                <span>Exhale thick clouds</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="privacy-note">
+            <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span>Your camera stays on your device. Client-side computer vision only. Nothing is recorded or uploaded.</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="loading-screen" class="screen-overlay">
+        <div class="loading-container glass-card">
+          <div class="smoke-loader">
+            <div class="smoke-ring-orbit ring-1"></div>
+            <div class="smoke-ring-orbit ring-2"></div>
+            <div class="smoke-ring-orbit ring-3"></div>
+            <div class="loader-center-coal"></div>
+          </div>
+          <h2 class="loading-title">Lighting The Coals</h2>
+          <p id="loading-status-text" class="loading-status">
+            Loading MediaPipe vision models...
+          </p>
+          <div class="loading-bar-wrapper">
+            <div id="loading-bar-fill" class="loading-bar-fill"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="error-screen" class="screen-overlay">
+        <div class="glass-card error-card">
+          <div class="error-badge-icon">⚠️</div>
+          <h2 id="error-title" class="error-title">Camera Access Required</h2>
+          <p id="error-message" class="error-desc">
+            We couldn't access your camera. Please ensure permissions are granted in your browser settings.
+          </p>
+          <div class="error-actions">
+            <button id="btn-error-retry" class="btn btn-primary" type="button">
+              Retry Camera
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div id="experience-hud" class="experience-hud hidden">
+        <header class="hud-top-bar">
+          <div class="hud-brand">
+            <span class="hud-logo-icon">💨</span>
+            <div class="hud-brand-text">
+              <span class="hud-title">Hookah Lounge</span>
+              <span id="hud-tracking-mode" class="hud-mode-badge">Camera Active</span>
+            </div>
+          </div>
+
+          <div id="active-flavor-badge" class="flavor-capsule flavor-mint" title="Current Flavor">
+            <span class="flavor-dot"></span>
+            <span id="flavor-badge-text">Fresh Mint</span>
+          </div>
+
+          <div class="hud-actions">
+            <button id="btn-sound-toggle" class="icon-btn" title="Toggle Sound / Ambiance (M)" aria-label="Toggle Sound">
+              <svg id="icon-sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+              <svg id="icon-sound-off" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <line x1="23" y1="9" x2="17" y2="15"/>
+                <line x1="17" y1="9" x2="23" y2="15"/>
+              </svg>
+            </button>
+
+            <button id="btn-skeleton-toggle" class="icon-btn" title="Toggle Tracking Mesh Overlay (S)" aria-label="Toggle Skeleton">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 12h20M12 2v20M5 5l14 14M19 5L5 19"/>
+              </svg>
+            </button>
+
+            <button id="btn-screenshot" class="icon-btn" title="Take Lounge Snapshot" aria-label="Screenshot">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </button>
+
+            <button id="btn-settings" class="icon-btn" title="Settings & Help" aria-label="Settings">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <aside class="hud-inhale-panel">
+          <div class="inhale-meter-frame">
+            <div class="meter-label">INHALE</div>
+            <div class="meter-track">
+              <div id="inhale-meter-glow" class="meter-glow"></div>
+              <div id="inhale-meter-fill" class="meter-fill">
+                <div class="meter-bubbles"></div>
+              </div>
+            </div>
+            <div id="inhale-meter-val" class="meter-percent">0%</div>
+          </div>
+        </aside>
+
+        <div id="coaching-banner" class="coaching-banner">
+          <div class="coaching-icon" id="coaching-icon">👌</div>
+          <span id="coaching-text" class="coaching-text">
+            Pinch near the mouthpiece to grab it
+          </span>
+        </div>
+
+        <div id="face-warning" class="face-warning-toast hidden">
+          <span>👀 Move closer to camera so your face is visible</span>
+        </div>
+
+        <footer class="hud-bottom-bar">
+          <div class="flavor-selector-panel glass-card">
+            <span class="flavor-bar-label">FLAVORS</span>
+            <div class="flavor-pills-list">
+              <button class="flavor-btn active" data-flavor="mint">
+                <span class="flavor-swatch mint"></span>
+                <span>Mint</span>
+              </button>
+              <button class="flavor-btn" data-flavor="grape">
+                <span class="flavor-swatch grape"></span>
+                <span>Grape</span>
+              </button>
+              <button class="flavor-btn" data-flavor="watermelon">
+                <span class="flavor-swatch watermelon"></span>
+                <span>Watermelon</span>
+              </button>
+              <button class="flavor-btn" data-flavor="double-apple">
+                <span class="flavor-swatch double-apple"></span>
+                <span>Double Apple</span>
+              </button>
+            </div>
+            <span class="swipe-hint">💡 Tip: Swipe hand left/right to switch (or press 1-4)</span>
+          </div>
+        </footer>
+      </div>
+
+      <div id="settings-modal" class="modal-backdrop hidden">
+        <div class="glass-card modal-card">
+          <div class="modal-header">
+            <h3>Lounge Settings</h3>
+            <button id="btn-close-settings" class="modal-close-btn">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="setting-row">
+              <div class="setting-info">
+                <strong>Hand & Face Mesh Overlay</strong>
+                <span>Visualize tracking points in real-time</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-mesh-toggle" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-info">
+                <strong>Romantic Lounge Music</strong>
+                <span>Lush Fender Rhodes & analog warm chords</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-music-toggle" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-info">
+                <strong>Reduced Motion</strong>
+                <span>Subtle smoke and smoother camera pan</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-reduced-motion" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-info">
+                <strong>Pinch Sensitivity</strong>
+                <span>Ease of grabbing the pipe with hand</span>
+              </div>
+              <input type="range" id="setting-sensitivity" min="0.4" max="0.9" step="0.05" value="0.65" />
+            </div>
+
+            <div class="settings-help">
+              <h4>Gestures Quick Guide</h4>
+              <ul>
+                <li><strong>Grab Pipe:</strong> Pinch thumb & index fingertip near the pipe.</li>
+                <li><strong>Drag:</strong> Move your hand to move the hose naturally with physics.</li>
+                <li><strong>Smoke:</strong> Bring mouthpiece to your mouth. Water bubbles & coals flare!</li>
+                <li><strong>Exhale:</strong> Move the pipe away and open your mouth to release thick clouds of smoke.</li>
+                <li><strong>Smoke Rings:</strong> Exhale while making an "O" shape with your lips.</li>
+                <li><strong>Change Flavor:</strong> Open-palm swipe left or right in front of camera.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="snapshot-flash" class="snapshot-flash"></div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
